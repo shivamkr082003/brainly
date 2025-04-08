@@ -18,7 +18,9 @@
   "homepage": "https://github.com/shivamkr082003/brainly#readme",
   "description": "",
   "dependencies": {
+    "@types/express": "^5.0.1",
     "express": "^5.1.0",
+    "mongoose": "^8.13.2",
     "typescript": "^5.8.3"
   }
 }
