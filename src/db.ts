@@ -2,7 +2,8 @@
 import mongoose, { model, Schema } from "mongoose";
 
 // Connecting to the MongoDB database using a connection string
-mongoose.connect("mongodb+srv://User:BxHYjOR4Ryj03Yml@cluster0.na6tv.mongodb.net/brainly");
+mongoose.connect(process.env.MONGO_URL as string);
+
 
 // Defining a schema for the 'User' collection
 // Each user will have a unique 'username' and a 'password'

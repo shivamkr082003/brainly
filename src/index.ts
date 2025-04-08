@@ -4,10 +4,16 @@ import jwt from "jsonwebtoken";
 import { ContentModel,  UserModel } from "./db";
 import { JWT_SECRET } from "./config";
 import { userMiddleware } from "./middleware";
+import dotenv from "dotenv";
+
+
+
+
 
 
 const app = express();
-app.use(express.json()); // Middleware to parse JSON request bodies.
+app.use(express.json());// Middleware to parse JSON request bodies.
+dotenv.config();
 
 
 // Route 1: User Signup
