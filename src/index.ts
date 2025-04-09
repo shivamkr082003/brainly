@@ -1,10 +1,17 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
+import { random } from "./utils";
 
 import jwt from "jsonwebtoken";
-import { ContentModel,  UserModel } from "./db";
+import { ContentModel,LinkModel,  UserModel } from "./db";
 import { JWT_SECRET } from "./config";
 import { userMiddleware } from "./middleware";
-import dotenv from "dotenv";
+
+import cors from "cors";
+// import mongoose from "mongoose";
+
 
 
 
@@ -13,8 +20,10 @@ import dotenv from "dotenv";
 
 const app = express();
 app.use(express.json());// Middleware to parse JSON request bodies.
-dotenv.config();
+app.use(cors());
 
+
+// mongoose.connect(process.env.MONGO_URL as string);
 
 // Route 1: User Signup
 app.post("/api/v1/signup", async (req, res) => {
@@ -87,55 +96,55 @@ app.delete("/api/v1/content", userMiddleware, async (req, res) => {
     res.json({ message: "Deleted" }); // Send success response.
 });
 
-// Route 6: Share Content Link
-// app.post("/api/v1/brain/share", userMiddleware, async (req, res) => {
-//     const { share } = req.body;
-//     if (share) {
-//         // Check if a link already exists for the user.
-//         const existingLink = await LinkModel.findOne({ userId: req.userId });
-//         if (existingLink) {
-//             res.json({ hash: existingLink.hash }); // Send existing hash if found.
-//             return;
-//         }
+//Route 6: Share Content Link
+app.post("/api/v1/brain/share", userMiddleware, async (req, res) => {
+    const { share } = req.body;
+    if (share) {
+        // Check if a link already exists for the user.
+        const existingLink = await LinkModel.findOne({ userId: req.userId });
+        if (existingLink) {
+            res.json({ hash: existingLink.hash }); // Send existing hash if found.
+            return;
+        }
 
-//         // Generate a new hash for the shareable link.
-//         const hash = random(10);
-//         await LinkModel.create({ userId: req.userId, hash });
-//         res.json({ hash }); // Send new hash in the response.
-//     } else {
-//         // Remove the shareable link if share is false.
-//         await LinkModel.deleteOne({ userId: req.userId });
-//         res.json({ message: "Removed link" }); // Send success response.
-//     }
-// });
+        // Generate a new hash for the shareable link.
+        const hash = random(10);
+        await LinkModel.create({ userId: req.userId, hash });
+        res.json({ hash }); // Send new hash in the response.
+    } else {
+        // Remove the shareable link if share is false.
+        await LinkModel.deleteOne({ userId: req.userId });
+        res.json({ message: "Removed link" }); // Send success response.
+    }
+});
 
-// Route 7: Get Shared Content
-// app.get("/api/v1/brain/:shareLink", async (req, res) => {
-//     const hash = req.params.shareLink;
+//Route 7: Get Shared Content
+app.get("/api/v1/brain/:shareLink", async (req, res) => {
+    const hash = req.params.shareLink;
 
-//     // Find the link using the provided hash.
-//     const link = await LinkModel.findOne({ hash });
-//     if (!link) {
-//         res.status(404).json({ message: "Invalid share link" }); // Send error if not found.
-//         return;
-//     }
+    // Find the link using the provided hash.
+    const link = await LinkModel.findOne({ hash });
+    if (!link) {
+        res.status(404).json({ message: "Invalid share link" }); // Send error if not found.
+        return;
+    }
 
-//     // Fetch content and user details for the shareable link.
-//     const content = await ContentModel.find({ userId: link.userId });
-//     const user = await UserModel.findOne({ _id: link.userId });
+    // Fetch content and user details for the shareable link.
+    const content = await ContentModel.find({ userId: link.userId });
+    const user = await UserModel.findOne({ _id: link.userId });
 
-//     if (!user) {
-//         res.status(404).json({ message: "User not found" }); // Handle missing user case.
-//         return;
-//     }
+    if (!user) {
+        res.status(404).json({ message: "User not found" }); // Handle missing user case.
+        return;
+    }
 
-//     res.json({
-//         username: user.username,
-//         content
-//     }); // Send user and content details in response.
-// });
+    res.json({
+        username: user.username,
+        content
+    }); // Send user and content details in response.
+});
 
-// Start the server
+//Start the server
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
 });
