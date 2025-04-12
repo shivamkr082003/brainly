@@ -8,12 +8,22 @@ mongoose.connect(process.env.MONGO_URL as string);
 // Defining a schema for the 'User' collection
 // Each user will have a unique 'username' and a 'password'
 const UserSchema = new Schema({
-    username: { type: String, unique: true }, // Unique username to ensure no duplicates
+    email: { type: String, unique: true }, // Unique username to ensure no duplicates
     password: { type: String }               // Password for the user
 });
 
 // Creating a model for the 'User' collection, enabling interactions with the database
 export const UserModel = model("User", UserSchema);
+
+
+const OtpSchema = new mongoose.Schema({
+  email: String,
+  otp: String,
+  expiresAt: Date
+});
+
+export const OtpModel = model("Otp", OtpSchema);
+
 
 // Defining a schema for the 'Content' collection
 // Each content will have a 'title', a 'Link', an array of 'tags', and a reference to a 'userId'
