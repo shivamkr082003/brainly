@@ -1,182 +1,147 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
 
+
 import express from "express";
-import jwt from "jsonwebtoken";
-import cors from "cors";
-import bcrypt from "bcrypt";
-import nodemailer from "nodemailer";
 import { random } from "./utils";
-import { ContentModel, LinkModel, UserModel, OtpModel } from "./db"; // Added OtpModel
+import jwt from "jsonwebtoken";
+import { ContentModel, LinkModel, UserModel } from "./db";
 import { JWT_SECRET } from "./config";
 import { userMiddleware } from "./middleware";
+import cors from "cors";
+
 
 
 const app = express();
-app.use(express.json());
-app.use(cors());
+app.use(express.json()); // Middleware to parse JSON request bodies.
+app.use(cors()); // Middleware to allow cross-origin requests.
 
-// -------------------- USER SIGNUP --------------------
 
+
+// Route 1: User Signup
 app.post("/api/v1/signup", async (req, res) => {
-    const email = req.body.email;
+    // TODO: Use zod or a similar library for input validation.
+    // TODO: Hash the password before storing it in the database.
+    const username = req.body.username;
     const password = req.body.password;
 
     try {
-        const hashedPassword = await bcrypt.hash(password, 10); // Hash password
-        await UserModel.create({ email, password: hashedPassword });
-        res.json({ message: "User signed up" });
+        // Create a new user with the provided username and password.
+        await UserModel.create({ username, password });
+        res.json({ message: "User signed up" }); // Send success response.
     } catch (e) {
-        res.status(409).json({ message: "User already exists" });
+        // Handle errors like duplicate usernames.
+        res.status(409).json({ message: "User already exists" }); // Conflict status.
     }
 });
 
-// -------------------- USER SIGNIN --------------------
-
-
+// Route 2: User Signin
 app.post("/api/v1/signin", async (req, res) => {
-    const email = req.body.email;
+    const username = req.body.username;
     const password = req.body.password;
 
-    const existingUser = await UserModel.findOne({ email });
-    if (existingUser?.password && await bcrypt.compare(password, existingUser.password)) {
-
+    // Find a user with the provided credentials.
+    const existingUser = await UserModel.findOne({ username, password });
+    if (existingUser) {
+        // Generate a JWT token with the user's ID.
         const token = jwt.sign({ id: existingUser._id }, JWT_SECRET);
-        res.json({ token });
+        res.json({ token }); // Send the token in response.
     } else {
+        // Send error response for invalid credentials.
         res.status(403).json({ message: "Incorrect credentials" });
     }
 });
 
-// -------------------- OTP SEND --------------------
-
-app.post("/api/v1/send-otp", async (req, res) => {
-    const { email } = req.body;
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Save OTP to DB with expiry
-    await OtpModel.findOneAndUpdate(
-        { email },
-        { otp, expiresAt: new Date(Date.now() + 5 * 60 * 1000) }, // 5 mins expiry
-        { upsert: true }
-    );
-
-    // Send OTP via email
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
-
-    await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "Your OTP Code",
-        text: `Your OTP is ${otp}. It expires in 5 minutes.`,
-    });
-
-    res.json({ message: "OTP sent to email" });
-});
-
-// -------------------- OTP VERIFY --------------------
-
-app.post("/api/v1/verify-otp", async (req, res)=> {
-    const { email, otp } = req.body;
-
-    const record = await OtpModel.findOne({ email });
-
-    if (!record || record.otp !== otp || new Date() > new Date(record.expiresAt || 0)) {
-
-        res.status(400).json({ message: "Invalid or expired OTP" });
-        return;
-    }
-
-    await OtpModel.deleteOne({ email }); // Invalidate OTP after use
-
-    res.json({ message: "OTP verified" });
-});
-
-// -------------------- ADD CONTENT --------------------
-
+// Route 3: Add Content
 app.post("/api/v1/content", userMiddleware, async (req, res) => {
     const { link, type, title } = req.body;
-
+    // Create a new content entry linked to the logged-in user.
     await ContentModel.create({
         link,
         type,
         title,
-        userId: req.userId,
-        tags: []
+        userId: req.userId, // userId is added by the middleware.
+        tags: [] // Initialize tags as an empty array.
     });
 
-    res.json({ message: "Content added" });
+    res.json({ message: "Content added" }); // Send success response.
 });
 
-// -------------------- GET USER CONTENT --------------------
-
+// Route 4: Get User Content
 app.get("/api/v1/content", userMiddleware, async (req, res) => {
-    const userId = req.userId;
-    const content = await ContentModel.find({ userId }).populate("userId", "username");
-    res.json(content);
+    //@ts-ignore
+    const userId = req.userId;  // User ID is fetched from middleware
+    // Fetch all content associated with the user ID and populate username
+    // The `populate` function is used to include additional details from the referenced `userId`.
+    // For example, it will fetch the username linked to the userId.
+    // Since we specified "username", only the username will be included in the result, 
+    // and other details like password won’t be fetched.
+    const content = await ContentModel.find({ userId: userId }).populate("userId", "username");
+    res.json(content);  // Send the content as response
 });
 
-// -------------------- DELETE CONTENT --------------------
-
+// Route 5: Delete User Content
 app.delete("/api/v1/content", userMiddleware, async (req, res) => {
     const contentId = req.body.contentId;
+
+    // Delete content based on contentId and userId.
     await ContentModel.deleteMany({ contentId, userId: req.userId });
-    res.json({ message: "Deleted" });
+    res.json({ message: "Deleted" }); // Send success response.
 });
 
-// -------------------- SHARE LINK --------------------
-
-app.post("/api/v1/brain/share", userMiddleware,async (req, res) => {
+// Route 6: Share Content Link
+app.post("/api/v1/brain/share", userMiddleware, async (req, res) => {
     const { share } = req.body;
     if (share) {
+        // Check if a link already exists for the user.
         const existingLink = await LinkModel.findOne({ userId: req.userId });
         if (existingLink) {
-
-         res.json({ hash: existingLink.hash });
-         return;
+            res.json({ hash: existingLink.hash }); // Send existing hash if found.
+            return;
         }
+
+        // Generate a new hash for the shareable link.
         const hash = random(10);
         await LinkModel.create({ userId: req.userId, hash });
-        res.json({ hash });
+        res.json({ hash }); // Send new hash in the response.
     } else {
+        // Remove the shareable link if share is false.
         await LinkModel.deleteOne({ userId: req.userId });
-        res.json({ message: "Removed link" });
+        res.json({ message: "Removed link" }); // Send success response.
     }
 });
 
-// -------------------- VIEW SHARED LINK --------------------
-
-app.get("/api/v1/brain/:shareLink", async (req, res)=> {
+// Route 7: Get Shared Content
+app.get("/api/v1/brain/:shareLink", async (req, res) => {
     const hash = req.params.shareLink;
 
+    // Find the link using the provided hash.
     const link = await LinkModel.findOne({ hash });
     if (!link) {
-
-     res.status(404).json({ message: "Invalid share link" });
-     return;
+        res.status(404).json({ message: "Invalid share link" }); // Send error if not found.
+        return;
     }
+
+    // Fetch content and user details for the shareable link.
     const content = await ContentModel.find({ userId: link.userId });
     const user = await UserModel.findOne({ _id: link.userId });
-    if (!user) {
 
-    res.status(404).json({ message: "User not found" });
-    return ;
+    if (!user) {
+        res.status(404).json({ message: "User not found" }); // Handle missing user case.
+        return;
     }
-    res.json({ email: user.email, content });
+
+    res.json({
+        username: user.username,
+        content
+    }); // Send user and content details in response.
 });
 
-// -------------------- START SERVER --------------------
-
+// Start the server
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
 });
+
 
 
 

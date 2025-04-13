@@ -2,28 +2,17 @@
 import mongoose, { model, Schema } from "mongoose";
 
 // Connecting to the MongoDB database using a connection string
-mongoose.connect(process.env.MONGO_URL as string);
-
+mongoose.connect(process.env.MONGO_URL  as 'string');
 
 // Defining a schema for the 'User' collection
 // Each user will have a unique 'username' and a 'password'
 const UserSchema = new Schema({
-    email: { type: String, unique: true }, // Unique username to ensure no duplicates
+    username: { type: String, unique: true }, // Unique username to ensure no duplicates
     password: { type: String }               // Password for the user
 });
 
 // Creating a model for the 'User' collection, enabling interactions with the database
 export const UserModel = model("User", UserSchema);
-
-
-const OtpSchema = new mongoose.Schema({
-  email: String,
-  otp: String,
-  expiresAt: Date
-});
-
-export const OtpModel = model("Otp", OtpSchema);
-
 
 // Defining a schema for the 'Content' collection
 // Each content will have a 'title', a 'Link', an array of 'tags', and a reference to a 'userId'
@@ -41,8 +30,8 @@ const ContentSchema = new Schema({
 // Creating a model for the 'Content' collection to interact with the database
 export const ContentModel = model("Content", ContentSchema);
 
-//Importing the Schema and model from Mongoose
-//Mongoose is a library that provides a schema-based solution for modeling application data
+// Importing the Schema and model from Mongoose
+// Mongoose is a library that provides a schema-based solution for modeling application data
 const LinkSchema = new Schema({
     // 'hash' is a string that represents the shortened or hashed version of a link
     hash: String,
@@ -55,6 +44,6 @@ const LinkSchema = new Schema({
     userId: { type: mongoose.Types.ObjectId, ref: 'User', required: true, unique: true },
 });
 
-//Exporting the LinkModel based on the LinkSchema
-//The model represents the 'Links' collection in the database
+// Exporting the LinkModel based on the LinkSchema
+// The model represents the 'Links' collection in the database
 export const LinkModel = model("Links", LinkSchema);
