@@ -1,9 +1,9 @@
 
 
-import { Signin } from "./pages/Signin"; // Importing the Signin page component
-import { Signup } from "./pages/Signup"; // Importing the Signup page component
+import { Signin } from "./pages/Signin.tsx"; // Importing the Signin page component
+import { Signup } from "./pages/Signup.tsx"; // Importing the Signup page component
 import { BrowserRouter, Routes, Route } from "react-router-dom"; // Importing Router components from react-router-dom for routing
-import { Dashboard } from "./pages/dashboard"; // Importing the Dashboard page component
+import { Dashboard } from "./pages/dashboard.tsx"; // Importing the Dashboard page component
 
 // App component to define the routing structure of the application
 function App() {
