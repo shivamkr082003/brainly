@@ -22,7 +22,7 @@ export function useContent() {
 
       console.log("Fetched content:", response.data);
 
-      setContents(response.data.content); // ✅ Make sure `content` exists in response
+      setContents(response.data); // ✅ Make sure `content` exists in response
     } catch (error) {
       console.error("Error fetching content:", error);
     }

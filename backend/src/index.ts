@@ -9,19 +9,33 @@ import { ContentModel, LinkModel, UserModel } from "./db";
 import { JWT_SECRET } from "./config";
 import { userMiddleware } from "./middleware";
 import cors from "cors";
-
+// import { z } from "zod";
 
 
 const app = express();
 app.use(express.json()); // Middleware to parse JSON request bodies.
-app.use(cors()); // Middleware to allow cross-origin requests.
-
+app.use(cors()); // Middleware to allow cross-origin re
 
 
 // Route 1: User Signup
-app.post("/api/v1/signup", async (req, res) => {
-    // TODO: Use zod or a similar library for input validation.
-    // TODO: Hash the password before storing it in the database.
+app.post("/api/v1/signup", async function (req, res)  {
+    // const requireBody = z.object({
+    //     username: z.string().min(5), // Email must be a valid format and at least 5 characters
+    //     password: z.string().min(5), // Password must be at least 5 characters
+        
+    // });
+
+    // // Parse and validate the request body data
+    // const parseDataWithSuccess = requireBody.safeParse(req.body);
+
+    // // If the data format is incorrect, send an error message to the client
+    // if (!parseDataWithSuccess.success) {
+    //     return res.json({
+    //         message: "Incorrect data format",
+    //         error: parseDataWithSuccess.error,
+    //     });
+    // }
+    
     const username = req.body.username;
     const password = req.body.password;
 

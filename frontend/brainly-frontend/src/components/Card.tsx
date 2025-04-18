@@ -1,3 +1,5 @@
+import { DeleteIcon } from "../icons/DeleteIcon";
+import { DocumentIcon } from "../icons/DocumentIcon";
 import { ShareIcon } from "../icons/ShareIcon";
 
 interface CardProps {
@@ -18,7 +20,7 @@ export function Card({ title, link, type }: CardProps) {
                     <div className="flex items-center text-md">
                         <div className="text-gray-500 pr-2">
                             {/* Share Icon preceding the title */}
-                            <ShareIcon />
+                            <DocumentIcon />
                         </div>
                         {title}
                     </div>
@@ -32,7 +34,7 @@ export function Card({ title, link, type }: CardProps) {
                         </div>
                         <div className="text-gray-500">
                             {/* Placeholder for another Share Icon */}
-                            <ShareIcon />
+                            <DeleteIcon />
                         </div>
                     </div>
                 </div>

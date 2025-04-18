@@ -5,57 +5,58 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      {/* Left Section for Branding (Only on large screens) */}
-      <div className="hidden lg:flex items-center justify-center bg-black w-1/2 px-12">
-        <div className="flex flex-col items-center max-w-md space-y-6 text-center text-white">
-          <div className="pr-2 text-purple-600 w-20 ">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-indigo-50 via-purple-100 to-indigo-200">
+      
+      {/* Left - Hero Content */}
+      <div className="flex flex-col justify-center px-10 py-20 lg:w-1/2 space-y-8">
+        <div className="flex items-center gap-3">
+          <div className="text-purple-600 w-12 h-12">
             <Logo />
           </div>
-          <h1 className="text-3xl font-normal tracking-wider mb-2">
-            Welcome to <span className="font-extrabold italic text-4xl underline">Brainly!</span>
-          </h1>
-          <span className="text-xl font-light tracking-tight">Think Smart. Log In Smarter.</span>
-        </div>
-      </div>
-
-      {/* Right Section for Auth Actions */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-white px-4 py-12 sm:px-6 lg:px-8">
-        <div className="flex items-center space-x-2 mb-6">
-          <div className="pr-2 text-purple-600  h-10 display flex items-center justify-center">
-            <Logo />
-          </div>
-          <span className="font-semibold italic text-xl underline">Brainly</span>
+          <h1 className="text-4xl font-bold italic text-purple-700 tracking-wide">Brainly</h1>
         </div>
 
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Welcome to Brainly</h2>
-        <p className="text-gray-600 text-lg mb-8 text-center">
-          A simple and secure way to manage your account. Get started below.
+        <h2 className="text-5xl font-extrabold text-gray-900 leading-tight">
+          Capture your thoughts. <br />
+          Access them anytime.
+        </h2>
+
+        <p className="text-lg text-gray-600 max-w-xl">
+          Brainly is your personal digital notepad – save ideas, links, tweets, videos, or anything you want to revisit.
+          Organized. Private. Always accessible.
         </p>
 
-        <div className="flex flex-col md:flex-row justify-center gap-6 w-full max-w-sm">
+        <div className="flex flex-col sm:flex-row gap-4 pt-4">
           <button
             onClick={() => navigate("/signup")}
-            className="w-full bg-purple-600 text-white py-3 px-6 rounded-xl text-lg font-semibold shadow-md hover:bg-purple-700 transform hover:scale-105 transition-all duration-300"
+            className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-8 rounded-xl text-lg font-semibold shadow-md transition-all duration-300 transform hover:scale-105"
           >
-            Signup
+            Get Started
           </button>
           <button
             onClick={() => navigate("/signin")}
-            className="w-full bg-indigo-600 text-white py-3 px-6 rounded-xl text-lg font-semibold shadow-md hover:bg-indigo-700 transform hover:scale-105 transition-all duration-300"
+            className="bg-white border border-gray-300 hover:border-gray-400 text-gray-800 py-3 px-8 rounded-xl text-lg font-semibold shadow-sm transition-all duration-300 transform hover:scale-105"
           >
-            Signin
+            Sign In
           </button>
         </div>
+      </div>
 
-        <div className="mt-10 text-sm text-gray-500">
-          © 2025 Brainly Inc. All rights reserved.
-        </div>
+      {/* Right - Illustration */}
+      <div className="hidden lg:flex items-center justify-center lg:w-1/2 bg-white shadow-inner">
+        <img
+          src="/saveimage.png"
+          alt="Note Taking Illustration"
+          className="w-full h-full object-cover"
+        />
       </div>
     </div>
   );
 };
 
 export default HomePage;
+
+
+
 
 
