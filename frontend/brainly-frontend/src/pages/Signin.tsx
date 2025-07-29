@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom"; // Importing useNavigate hook fo
 // Signin component to handle user login
 export function Signin() {
     // References for the username and password input fields
-    const usernameRef = useRef<HTMLInputElement>(null); 
+    const emailRef = useRef<HTMLInputElement>(null); 
     const passwordRef = useRef<HTMLInputElement>(null);
 
     // useNavigate hook for navigating to different routes
@@ -16,13 +16,13 @@ export function Signin() {
 
     // signin function to handle user authentication
     async function signin() {
-        const username = usernameRef.current?.value; // Get the value from the username input field
-        console.log(usernameRef.current); // Log the username reference for debugging (optional)
+        const email = emailRef.current?.value; // Get the value from the username input field
+        console.log(emailRef.current); // Log the username reference for debugging (optional)
         const password = passwordRef.current?.value; // Get the value from the password input field
 
         // Send POST request to the backend API for signin
         const response = await axios.post(BACKEND_URL + "/api/v1/signin", {
-            username, // Send username as part of the request
+            email, // Send username as part of the request
             password  // Send password as part of the request
         });
 
@@ -39,7 +39,7 @@ export function Signin() {
         <div className="h-screen w-screen bg-gray-200 flex justify-center items-center">
             <div className="bg-white rounded-xl border min-w-48 p-8">
                 {/* Input for username */}
-                <Input reference={usernameRef} placeholder="Username" />
+                <Input reference={emailRef} placeholder="Email" />
                 
                 {/* Input for password */}
                 <Input reference={passwordRef} placeholder="Password" />

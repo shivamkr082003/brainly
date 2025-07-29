@@ -3,12 +3,16 @@ dotenv.config();
 
 
 import express from "express";
+
 import { random } from "./utils";
 import jwt from "jsonwebtoken";
 import { ContentModel, LinkModel, UserModel } from "./db";
 import { JWT_SECRET } from "./config";
 import { userMiddleware } from "./middleware";
 import cors from "cors";
+import { z } from "zod";
+import bcrypt from "bcrypt"; // Importing bcrypt for password hashing
+
 // import { z } from "zod";
 
 
@@ -18,44 +22,89 @@ app.use(cors()); // Middleware to allow cross-origin re
 
 
 // Route 1: User Signup
-app.post("/api/v1/signup", async function (req, res)  {
-    // const requireBody = z.object({
-    //     username: z.string().min(5), // Email must be a valid format and at least 5 characters
-    //     password: z.string().min(5), // Password must be at least 5 characters
-        
-    // });
+app.post("/api/v1/signup", async function (req, res) {
+    // Input validation using zod 
+    const requiredBody = z.object({
+        email: z.string().email().min(5), 
+        password: z.string()
+            .min(8) 
+            .regex(/[A-Z]/) 
+            .regex(/[a-z]/)
+            .regex(/[0-9]/)
+            .regex(/[^A-Za-z0-9]/)
+    });
+     
+      
 
-    // // Parse and validate the request body data
-    // const parseDataWithSuccess = requireBody.safeParse(req.body);
+    const parsedDataSuccess = requiredBody.safeParse(req.body);
 
-    // // If the data format is incorrect, send an error message to the client
-    // if (!parseDataWithSuccess.success) {
-    //     return res.json({
-    //         message: "Incorrect data format",
-    //         error: parseDataWithSuccess.error,
-    //     });
-    // }
+    if (!parsedDataSuccess.success) {
+         res.status(400).json({
+            message: "Incorrect Format",
+            error: parsedDataSuccess.error
+        });
+    }
+
+    const { email, password } = req.body;
+    console.log(req.body);
+
+    // Check if the email already exists in the database
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+         res.status(400).json({
+            message: "Email already exists"
+        });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 5);
     
-    const username = req.body.username;
-    const password = req.body.password;
-
     try {
-        // Create a new user with the provided username and password.
-        await UserModel.create({ username, password });
-        res.json({ message: "User signed up" }); // Send success response.
+        await UserModel.create({
+            email,
+            password: hashedPassword,
+        });
+        res.json({
+            message: "Sign-up Successful"
+        });
     } catch (e) {
-        // Handle errors like duplicate usernames.
-        res.status(409).json({ message: "User already exists" }); // Conflict status.
+        res.status(400).json({
+            message: "Something went wrong during sign-up",
+           
+        });
     }
 });
 
+
+
+
 // Route 2: User Signin
 app.post("/api/v1/signin", async (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
+   
+
+
+    const requireBody = z.object({
+        email: z.string().email(),
+        password: z.string().min(6),
+    });
+
+     // Parse and validate the request body data
+     const parseDataWithSuccess = requireBody.safeParse(req.body);
+     // If the data format is incorrect, send an error message to the client
+     if(!parseDataWithSuccess){
+          res.json({
+             message: "Incorrect data format",
+            
+         });
+     }
+ 
+     // Get the email and password from the request body
+     const {email,password} = req.body;
+     
+
+   
 
     // Find a user with the provided credentials.
-    const existingUser = await UserModel.findOne({ username, password });
+    const existingUser = await UserModel.findOne({ email, password });
     if (existingUser) {
         // Generate a JWT token with the user's ID.
         const token = jwt.sign({ id: existingUser._id }, JWT_SECRET);
@@ -146,15 +195,24 @@ app.get("/api/v1/brain/:shareLink", async (req, res) => {
     }
 
     res.json({
-        username: user.username,
+        email: user.email,
         content
     }); // Send user and content details in response.
 });
 
-// Start the server
+//Start the server
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
 });
+
+
+
+
+
+
+
+
+
 
 
 

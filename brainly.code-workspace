@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "brainly-frontened",
+			"path": ".."
+		},
+		{
+			"name": "brainly",
+			"path": "../../brainly"
+		}
+	],
+	"settings": {}
+}
